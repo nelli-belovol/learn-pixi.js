@@ -48,6 +48,22 @@ export class App {
 
     this.app.stage.position.set(800 / 2, 800 / 2);
 
+    const onPointerDown = (e: PIXI.FederatedPointerEvent) => {
+      console.log(e);
+      const positions = e.getLocalPosition(this.app!.stage);
+      this.app?.stage.addChild(
+        new PIXI.Graphics()
+          .beginFill(0xff0000, 1)
+          .drawCircle(positions.x, positions.y, 5)
+          .endFill(),
+      );
+    };
+
+    this.app.stage.on('pointerdown', onPointerDown, this);
+    this.app.stage.eventMode = 'dynamic';
+    this.app.stage.hitArea = new PIXI.Rectangle(-400, -400, 800, 800);
+    this.app.stage.interactiveChildren = false;
+
     this.canvasWrapper.appendChild(this.app.view as HTMLCanvasElement);
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
