@@ -43,69 +43,72 @@ export class App {
 
     const tank = new Tank();
     this.app.stage.addChild(tank.view);
-    tank.view.visible = false;
-    // tank.startTracks();
     this.app.stage.addChild(marker);
-
     this.app.stage.position.set(800 / 2, 800 / 2);
-
-    const onPointerDown = (e: PIXI.FederatedPointerEvent) => {
-      console.log(e);
-      const positions = e.getLocalPosition(this.app!.stage);
-      this.app?.stage.addChild(
-        new PIXI.Graphics()
-          .beginFill(0xff0000, 1)
-          .drawCircle(positions.x, positions.y, 5)
-          .endFill(),
-      );
-    };
-
-    this.app.stage.on('pointerdown', onPointerDown, this);
-    this.app.stage.eventMode = 'dynamic';
-    this.app.stage.hitArea = new PIXI.Rectangle(-400, -400, 800, 800);
-    const rectangle = new PIXI.Graphics()
-      .beginFill(0x000000, 1)
-      .drawRect(0, 0, 100, 100)
-      .endFill();
-
-    this.app.stage.addChild(rectangle);
-    this.app.stage.interactiveChildren = false;
-
-    // const value = 0;
-    // const stepValue = 0.01;
-    // const offset = 200;
-
-    this.app.ticker.add(() => {
-      // console.log(this.app?.ticker.lastTime);
-      // console.log(this.app?.ticker.deltaTime);
-      // console.log(this.app?.ticker.deltaMS);
-      // value += stepValue;
-      // rectangle.alpha = Math.cos(value);
-      // rectangle.position.x = offset * Math.cos(value);
-    });
 
     const tweenManager = new TweenManager(this.app.ticker);
 
-    window['testTweens'] = {
-      moveTo(duration: number, position: PIXI.Point) {
-        tweenManager.createTween(rectangle, duration, position);
-      },
-      rotateTo(duration: number, rotationData: { rotation: number }) {
-        // Изменено на { rotation: number }
-        tweenManager.createTween(rectangle, duration, {
-          rotation: rotationData.rotation, // Добавлено .rotation
-        });
-      },
-      moveAndRotate(
-        moveDuration: number,
-        position: PIXI.Point,
-        rotationDuration: number,
-        rotationData: { rotation: number },
-      ) {
-        this.moveTo(moveDuration, position);
-        this.rotateTo(rotationDuration, rotationData);
-      },
+    const moveTank = (e: PIXI.FederatedPointerEvent) => {
+      console.log(e);
+      const distanceToCenter = e.getLocalPosition(this.app!.stage);
+      const distanceToTank = e.getLocalPosition(tank.view);
+      const angle = Math.atan2(distanceToTank.y, distanceToTank.x);
+
+      let callAmount = 2;
+
+      const move = () => {
+        callAmount -= 1;
+        if (callAmount <= 0) {
+          tweenManager.createTween(
+            tank,
+            3000,
+            {
+              x: distanceToCenter.x,
+              y: distanceToCenter.y,
+            },
+            {
+              onStart() {
+                tank.startTracks();
+              },
+              onFinish() {
+                tank.stopTracks();
+              },
+            },
+          );
+        }
+      };
+
+      tweenManager.createTween(
+        tank,
+        1000,
+        { towerDirection: angle },
+        {
+          onFinish() {
+            move();
+          },
+        },
+      );
+      tweenManager.createTween(
+        tank,
+        2000,
+        { bodyDirection: angle },
+        {
+          onStart() {
+            tank.startTracks();
+          },
+          onFinish() {
+            tank.stopTracks();
+            move();
+          },
+        },
+      );
     };
+
+    this.app.stage.on('pointerdown', moveTank, this);
+    this.app.stage.eventMode = 'dynamic';
+    this.app.stage.interactiveChildren = false;
+    this.app.stage.hitArea = new PIXI.Rectangle(-400, -400, 800, 800);
+
     this.canvasWrapper.appendChild(this.app.view as HTMLCanvasElement);
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -99,12 +99,36 @@ export class Tank {
     return this._view;
   }
 
-  rotateTowerBy(angle: number) {
-    this._towerContainer.rotation += angle;
+  set towerDirection(value: number) {
+    this._towerContainer.rotation = value;
   }
 
-  rotateBodyBy(angle: number) {
-    this._bodyContainer.rotation += angle;
+  get towerDirection() {
+    return this._towerContainer.rotation;
+  }
+
+  set bodyDirection(value: number) {
+    this._bodyContainer.rotation = value;
+  }
+
+  get bodyDirection() {
+    return this._bodyContainer.rotation;
+  }
+
+  get x() {
+    return this._view.position.x;
+  }
+
+  set x(value: number) {
+    this._view.position.x = value;
+  }
+
+  get y() {
+    return this._view.position.y;
+  }
+
+  set y(value: number) {
+    this._view.position.y = value;
   }
 
   startTracks() {
